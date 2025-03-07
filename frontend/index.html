@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Style pour l'animation de bienvenue */
+        #welcome-message {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2em;
+            color: #28a745;
+            animation: fadeIn 1s ease-in-out;
+            display: none;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        /* Style pour le tableau des produits */
+        #products-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #products-table th, #products-table td {
+            padding: 10px;
+            text-align: left;
+            vertical-align: middle;
+        }
+        #products-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        #products-table td {
+            border-bottom: 1px solid #dee2e6;
+        }
+        /* Ajuster le bouton dans le tableau */
+        #products-table .btn {
+            white-space: nowrap;
+        }
+        /* Cacher par défaut les sections */
+        #auth-section, #products-section, #signup-form, #login-form {
+            transition: opacity 0.5s ease;
+        }
+        .hidden {
+            opacity: 0;
+            display: none;
+        }
+
+        /* Centrer le formulaire d'authentification */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+
+        #signup-form,#login-form {
+            max-width: 450px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- En-tête avec nom d'utilisateur et logout -->
+    <div id="welcome-message">
+        Bonjour, <span id="username-display"></span>
+        <button class="btn btn-danger btn-sm ms-2" onclick="logout()">Déconnecter</button>
+    </div>
+
+    <!-- Section d'authentification -->
+    <div id="auth-section" class="auth-container text-center">
+       <h1 style="position: relative;top: -50px;">Application E-commerce</h1> 
+        <div id="signup-form">
+            <h2>Inscription</h2>
+            <input type="text" id="signup-username" class="form-control mt-2" placeholder="Nom d'utilisateur">
+            <input type="password" id="signup-password" class="form-control mt-2" placeholder="Mot de passe">
+            <button class="btn btn-primary mt-3 w-100" onclick="signup()">S'inscrire</button>
+            <p class="mt-3">Vous avez déjà un compte ? <a href="#" onclick="showLogin()">Connectez-vous ici</a></p>
+        </div>
+        <div id="login-form" class="hidden">
+            <h2>Connexion</h2>
+            <input type="text" id="login-username" class="form-control mt-2" placeholder="Nom d'utilisateur">
+            <input type="password" id="login-password" class="form-control mt-2" placeholder="Mot de passe">
+            <button class="btn btn-success mt-3 w-100" onclick="login()">Se connecter</button>
+            <p class="mt-3">Vous n'avez pas de compte ? <a href="#" onclick="showSignup()">Inscrivez-vous ici</a></p>
+        </div>
+    </div>
+
+    <!-- Section des produits -->
+    <div id="products-section" class="hidden">
+        <h2 class="mt-5">Produits</h2>
+        <table id="products-table" class="table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Description</th>
+                    <th>Prix</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="products-list"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentUsername = null;
+
+        // Vérifie l'état de la session au chargement
+        window.onload = () => {
+            if (localStorage.getItem('loggedIn')) {
+                currentUsername = localStorage.getItem('username');
+                showAuthenticatedState();
+            } else {
+                showSignup(); // Affiche Sign Up par défaut au chargement
+            }
+        };
+
+        // Inscription
+        async function signup() {
+            const username = document.getElementById('signup-username').value;
+            const password = document.getElementById('signup-password').value;
+            const response = await fetch(`http://user-service.dev.svc.cluster.local:5001/signup`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            alert(data.message);
+            if (response.status === 201) {
+                document.getElementById('signup-username').value = '';
+                document.getElementById('signup-password').value = '';
+                showLogin(); // Passe au formulaire Login après une inscription réussie
+            }
+        }
+
+        // Connexion
+        async function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const response = await fetch(`http://user-service.dev.svc.cluster.local:5001/login`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username, password })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                currentUsername = username;
+                localStorage.setItem('loggedIn', 'true');
+                localStorage.setItem('username', username);
+                showAuthenticatedState();
+            } else {
+                alert(data.message);
+            }
+        }
+
+        // Déconnexion
+        function logout() {
+            currentUsername = null;
+            localStorage.removeItem('loggedIn');
+            localStorage.removeItem('username');
+            document.getElementById('welcome-message').style.display = 'none';
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('products-section').classList.add('hidden');
+            document.getElementById('products-list').innerHTML = '';
+            showSignup(); // Revient au formulaire Sign Up après déconnexion
+        }
+
+        // Charger les produits
+        async function loadProducts() {
+            const response = await fetch(`http://product-service.dev.svc.cluster.local:5002/products`);
+            const data = await response.json();
+            if (response.ok) {
+                const productsList = document.getElementById('products-list');
+                productsList.innerHTML = data.products.map(p => `
+                    <tr>
+                        <td>${p.name}</td>
+                        <td>${p.description}</td>
+                        <td>Prix: ${p.price} €</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="orderNow('${p.name}')">Ajouter au panier</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                alert(data.message);
+            }
+        }
+
+        // Action pour "Ajouter au panier"
+        function orderNow(productName) {
+            alert(`Order placed for ${productName}!`);
+            // Ajoutez ici une logique pour passer une commande si nécessaire
+        }
+
+        // Afficher l'état authentifié
+        function showAuthenticatedState() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('products-section').classList.remove('hidden');
+            document.getElementById('username-display').textContent = currentUsername;
+            document.getElementById('welcome-message').style.display = 'block';
+            loadProducts();
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+        }
+
+        // Afficher le formulaire Sign Up
+        function showSignup() {
+            document.getElementById('signup-form').classList.remove('hidden');
+            document.getElementById('login-form').classList.add('hidden');
+        }
+
+        // Afficher le formulaire Login
+        function showLogin() {
+            document.getElementById('signup-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
