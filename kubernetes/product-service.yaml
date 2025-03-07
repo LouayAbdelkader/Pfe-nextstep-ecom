@@ -8,8 +8,8 @@ spec:
     app: product-service 
   ports:
     - protocol: TCP
-      port: 5001
-      targetPort: 5001
+      port: 5002
+      targetPort: 5002
       nodePort: 30002  # Choisis un port entre 30000 et 32767 
   type: NodePort
 ---
