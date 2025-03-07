@@ -4,7 +4,7 @@ from flask_pymongo import PyMongo
 from flask_cors import CORS  # Importation de CORS
 
 app = Flask(__name__)
-app.config['MONGO_URI'] = 'mongodb://mongo-service.dev.svc.cluster.local:27017/users_db'
+app.config['MONGO_URI'] = 'mongodb://mongo-service:27017/users_db'
 mongo = PyMongo(app)
 bcrypt = Bcrypt(app)
 CORS(app)  # Active CORS pour toutes les routes, autorise toutes les origines par défaut
