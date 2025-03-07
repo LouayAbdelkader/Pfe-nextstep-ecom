@@ -1,33 +1,22 @@
-# Utiliser une image de base Python plus récente
-FROM python:3.12-slim
+# Utiliser une image de base Python basée sur Alpine
+FROM python:3.12-alpine
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Mettre à jour les paquets système et installer les outils nécessaires
-RUN apt-get update && apt-get upgrade -y \
-    && apt-get install -y build-essential wget \
-    && apt-get clean
-
-# Compiler une version corrigée de zlib
-RUN wget https://zlib.net/zlib-1.3.1.tar.gz \
-    && tar -xzf zlib-1.3.1.tar.gz \
-    && cd zlib-1.3.1 \
-    && ./configure && make && make install \
-    && ldconfig \
-    && cd .. && rm -rf zlib-1.3.1* \
-    && apt-get purge -y build-essential wget && apt-get autoremove -y
-
-# Tenter de supprimer perl-base si non nécessaire
-RUN apt-get remove -y perl-base && apt-get autoremove -y || true
+# Mettre à jour les paquets système d'Alpine pour s'assurer que zlib est à jour
+RUN apk update && apk upgrade
 
 # Copier les fichiers nécessaires
 COPY requirements.txt requirements.txt
 COPY . .
 
-# Mettre à jour pip et installer les dépendances Python
-RUN pip install --no-cache-dir --upgrade pip setuptools \
-    && pip install --no-cache-dir -r requirements.txt
+# Installer les dépendances Python
+# Note : build-base est l'équivalent de build-essential pour compiler des dépendances si nécessaire
+RUN apk add --no-cache build-base \
+    && pip install --no-cache-dir --upgrade pip setuptools \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apk del build-base
 
 # Exposer le port utilisé par Flask
 EXPOSE 5001
