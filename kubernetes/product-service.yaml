@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: product-service
-        image: mohamedlouay/product-service:latest  # Remplacez par votre image Docker
+        image: mohamedlouay/pfe-product-service:latest  # Remplacez par votre image Docker
         ports:
         - containerPort: 5002
         env:
