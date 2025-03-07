@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: mohamedlouay/pfe-frontend
+        image: mohamedlouay/pfe-front
         ports:
         - containerPort: 80
 
