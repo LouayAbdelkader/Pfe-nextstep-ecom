@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: mohamedlouay/user-service:latest  # Remplacez par votre image Docker
+        image: mohamedlouay/pfe-user-service:latest  # Remplacez par votre image Docker
         ports:
         - containerPort: 5001
         env:
