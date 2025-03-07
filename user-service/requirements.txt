@@ -2,3 +2,4 @@ Flask==3.0.3
 Flask-Bcrypt==1.0.1
 Flask-PyMongo==2.3.0
 flask-cors==4.0.2
+setuptools==70.0.0
