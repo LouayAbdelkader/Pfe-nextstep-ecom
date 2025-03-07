@@ -10,7 +10,7 @@ spec:
     - protocol: TCP
       port: 5001
       targetPort: 5001
-      nodePort: 30002  # Choisis un port entre 30000 et 32767 
+      nodePort: 30001  # Choisis un port entre 30000 et 32767 
   type: NodePort
 ---
 apiVersion: apps/v1
