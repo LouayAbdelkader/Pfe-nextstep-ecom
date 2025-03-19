@@ -7,7 +7,7 @@ from bson import ObjectId
 from pymongo.errors import PyMongoError
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "your-secret-key")  # Required for CSRF protection
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "louaymoncef")  # Required for CSRF protection
 app.config['MONGO_URI'] = os.getenv("MONGO_URI", "mongodb://mongo-service:27017/products_db")
 mongo = PyMongo(app)
 
