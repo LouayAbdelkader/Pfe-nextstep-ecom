@@ -1,18 +1,24 @@
-# Utiliser une image de base Python basée sur Alpine
+# Utiliser une image de base Python sécurisée
 FROM python:3.12-alpine
 
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Mettre à jour les paquets système d'Alpine pour s'assurer que zlib est à jour
+# Ajouter un utilisateur non-root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+# Mettre à jour les paquets et installer les dépendances
 RUN apk update && apk upgrade
+
+# Ajouter un fichier .dockerignore
+RUN echo "\n.env\n.git\n__pycache__/\n*.pyc\n*.pyo\nnode_modules/\n" > .dockerignore
 
 # Copier les fichiers nécessaires
 COPY requirements.txt requirements.txt
 COPY . .
 
 # Installer les dépendances Python
-# Note : build-base est l'équivalent de build-essential pour compiler des dépendances si nécessaire
 RUN apk add --no-cache build-base \
     && pip install --no-cache-dir --upgrade pip setuptools \
     && pip install --no-cache-dir -r requirements.txt \
